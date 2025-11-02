@@ -1,0 +1,9 @@
+# UI компоненты
+
+Создавайте здесь кастомные UI компоненты, которые дополняют PrimeVue.
+
+Примеры:
+- CustomButton.vue
+- CustomInput.vue
+- Modal.vue
+
