@@ -11,7 +11,7 @@ import (
 )
 
 // Загрузка БД
-func Setup() (*gorm.DB, error) {
+func SetupDataBase() (*gorm.DB, error) {
 	//Загрузка констант
 	err := godotenv.Load()
 	if err != nil {

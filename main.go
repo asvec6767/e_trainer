@@ -2,14 +2,33 @@ package main
 
 import (
 	"log"
+	"main/handlers"
+	"main/models"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 )
 
-func main() {
+// Инициализация БД в main.go
+func DBInit() *gorm.DB {
+	db, err := models.SetupDataBase()
+	if err != nil {
+		log.Println("Проблема при загрузке БД")
+	}
+
+	return db
+}
+
+func SetupRouter() *gin.Engine {
 	//Создание роутера
 	router := gin.Default()
+
+	// Инициализация БД
+	db := DBInit()
+	server := handlers.NewServer(db)
 
 	// Подключение шаблонов
 	router.LoadHTMLGlob("templates/*")
@@ -19,7 +38,22 @@ func main() {
 		ctx.HTML(http.StatusOK, "index.html", gin.H{})
 	})
 
+	group := router.Group("/api")
+	group.POST("/register", server.Register)
+	group.POST("/login", server.Login)
+
+	return router
+}
+
+func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("Ошибка при заугрзке файла .env")
+	}
+	port := os.Getenv("PORT")
+
+	router := SetupRouter()
+
 	//Запуск сервера
-	log.Println("Сервер запущен на http://localhost:8080/")
-	router.Run(":8080")
+	// log.Println("Сервер запущен на http://localhost:8080/")
+	log.Fatal(router.Run(":" + port))
 }

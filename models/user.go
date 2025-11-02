@@ -12,8 +12,8 @@ import (
 // Модель user
 type User struct {
 	gorm.Model
-	Username string `gorm:"size:255;not null;unique" json:"username" binding:"max=255"`
-	Password string `gorm:"size:255;not null;" json:"password" binding:"min=8;max=255"`
+	Username string `gorm:"size:255;not null;unique" json:"username"`
+	Password string `gorm:"size:255;not null;" json:"password"`
 }
 
 // Хэширование пароля
@@ -31,6 +31,7 @@ func (user *User) HashPassword() error {
 	return nil
 }
 
+// Удаление лишних пробелов из логина
 func (user *User) HtmlEscapeUsername() {
 	user.Username = html.EscapeString(strings.TrimSpace(user.Username))
 }
