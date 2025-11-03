@@ -37,6 +37,12 @@ func SetupRouter() *gin.Engine {
 	router.GET("/", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "index.html", gin.H{})
 	})
+	router.GET("/register", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "register.html", gin.H{})
+	})
+	router.GET("/login", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "login.html", gin.H{})
+	})
 
 	group := router.Group("/api")
 	group.POST("/register", server.Register)
