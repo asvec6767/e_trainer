@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"main/models"
+	"main/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +18,7 @@ type RegisterInput struct {
 }
 
 // Форма авторизации
-type LoginForm struct {
+type LoginInput struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
@@ -63,5 +65,45 @@ func (server *Server) Register(ctx *gin.Context) {
 }
 
 func (server *Server) Login(ctx *gin.Context) {
-	// TODO: сделать аутентификацию
+	var input LoginInput
+
+	if err := ctx.ShouldBind(&input); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user := models.User{Username: input.Username, Password: input.Password}
+
+	token, err := server.LoginCheck(user.Username, user.Password)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Ошибка валидации логина и пароля"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+func (server *Server) LoginCheck(username, password string) (string, error) {
+	var err error
+
+	user := models.User{}
+
+	if err = server.db.Model(models.User{}).Where("username=?", username).Take(&user).Error; err != nil {
+		return "", err
+	}
+
+	err = models.VerifyPassword(password, user.Password)
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return "", err
+	}
+
+	token, err := utils.GenerateToken(user)
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+
 }

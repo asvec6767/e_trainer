@@ -35,3 +35,8 @@ func (user *User) HashPassword() error {
 func (user *User) HtmlEscapeUsername() {
 	user.Username = html.EscapeString(strings.TrimSpace(user.Username))
 }
+
+// Проверка пароля
+func VerifyPassword(password, hashedPassword string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
